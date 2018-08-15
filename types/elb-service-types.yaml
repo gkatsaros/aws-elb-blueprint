@@ -20,11 +20,11 @@ node_types:
         default:
           blueprint: 
             id: "aws-elb-blueprint-elb"
-            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.2.zip"
             main_file_name: "elb.yaml"
-          deployment: 
+          deployment:
+            id: { get_attribute: [ SELF, elb_deployment_id] }
             inputs:
-              id: { get_attribute: [ SELF, elb_deployment_id] }
             outputs:
               ELB-FQDN: ELB-FQDN
               ELB_RESOURCE_ID: ELB_RESOURCE_ID
@@ -43,7 +43,7 @@ node_types:
         default:
           blueprint: 
             id: "aws-elb-blueprint-subnet"
-            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.2.zip"
             main_file_name: "subnet.yaml"
           deployment: 
             id: { get_input: subnet_deployment_id }
@@ -65,7 +65,7 @@ node_types:
         default:
           blueprint: 
             id: "aws-elb-blueprint-instance"
-            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.2.zip"
             main_file_name: "instance.yaml"
           deployment: 
             id: { get_input: instance_deployment_id }
