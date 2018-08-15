@@ -1,0 +1,169 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint deploys a simple Nginx webserver on a CentOS Linux Node in AWS
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
+  - plugin:cloudify-awssdk-plugin
+  - plugin:cloudify-utilities-plugin
+
+inputs:
+
+  aws_vpc_id:
+    description: >
+      The VPC ID from EC2
+    default: "vpc-d21bc6ba"
+
+dsl_definitions:
+
+  aws_config: &aws_config
+    aws_access_key_id: { get_secret: aws_access_key_id }
+    aws_secret_access_key: { get_secret: aws_secret_access_key }
+    ec2_region_name: { get_secret: ec2_region_name }
+    ec2_region_endpoint: { get_secret: ec2_region_endpoint }
+
+  client_config: &client_config
+    aws_access_key_id: { get_secret: aws_access_key_id }
+    aws_secret_access_key: { get_secret: aws_secret_access_key }
+    region_name: { get_secret: ec2_region_name }
+
+node_templates:
+
+
+  classic_stickiness_policy:
+    type: cloudify.nodes.aws.elb.Classic.Policy.Stickiness
+    properties:
+      resource_config:
+        kwargs:
+          PolicyName: myclassicstickinesspolicy
+          CookieExpirationPeriod: 3600
+      client_config: *client_config
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: classic_elb
+      - type: cloudify.relationships.depends_on
+        target: classic_elb_listener
+
+
+  classic_policy:
+    type: cloudify.nodes.aws.elb.Classic.Policy
+    properties:
+      resource_config:
+        kwargs:
+          PolicyName: myclassicpolicy
+          PolicyTypeName: ProxyProtocolPolicyType
+          PolicyAttributes:
+            - AttributeName: ProxyProtocol
+              AttributeValue: 'true'
+      client_config: *client_config
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: classic_elb
+
+
+  classic_health_check:
+    type: cloudify.nodes.aws.elb.Classic.HealthCheck
+    properties:
+      resource_config:
+        kwargs:
+          HealthCheck:
+            Target: 'HTTP:80/'
+            Interval: 15
+            Timeout: 5
+            UnhealthyThreshold: 2
+            HealthyThreshold: 5
+      client_config: *client_config
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: classic_elb
+
+
+  classic_elb_listener:
+    type: cloudify.nodes.aws.elb.Classic.Listener
+    properties:
+      resource_config:
+        kwargs:
+          Listeners:
+            - Protocol: HTTP
+              LoadBalancerPort: 80
+              InstancePort: 80
+      client_config: *client_config
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: classic_elb
+
+
+  classic_elb:
+    type: cloudify.nodes.aws.elb.Classic.LoadBalancer
+    properties:
+      resource_config:
+        kwargs:
+          LoadBalancerName: myclassicelb
+          Listeners:
+            get_property:
+              - classic_elb_listener
+              - resource_config
+              - kwargs
+              - Listeners
+      client_config: *client_config
+    relationships:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: awssdk.cloudify_awssdk.elb.resources.classic.load_balancer.start
+          inputs:
+            resource_config:
+              LoadBalancerAttributes:
+                CrossZoneLoadBalancing:
+                  Enabled: true
+                ConnectionSettings:
+                  IdleTimeout: 120
+
+
+  vpc:
+    type: cloudify.nodes.aws.ec2.Vpc
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+          CidrBlock: 'N/A'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: aws_vpc_id } 
+    relationships:
+
+
+  cloudify_host_cloud_config:
+    type: cloudify.nodes.CloudInit.CloudConfig
+    properties:
+      resource_config:
+        users:
+          - name: { get_input: agent_user }
+            primary-group: wheel
+            shell: /bin/bash
+            sudo: ['ALL=(ALL) NOPASSWD:ALL']
+            ssh-authorized-keys:
+              - { get_input: agent_key_public }
+        packages:
+          - [nginx]
+        runcmd:
+          - 'yum install nginx -y'
+          - 'touch /usr/share/nginx/html/status.html'
+          - 'echo "My IP address is:" > /usr/share/nginx/html/status.html'
+          - 'hostname -I >> /usr/share/nginx/html/status.html'
+          - 'systemctl enable nginx'
+          - 'systemctl start nginx'
+
+
+
+outputs:
+  ELB-FQDN:
+    description: AWS FQDN for the ELB instance
+    value: { get_attribute: [ classic_elb, DNSName ] }
+  ELB_RESOURCE_ID: 
+    description: the AWS resource id for the ELB instance
+    value: { get_attribute: [ classic_elb, aws_resource_id ] }

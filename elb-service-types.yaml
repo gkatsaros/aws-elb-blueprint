@@ -1,0 +1,65 @@
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+inputs:
+  elb_deployment_id:
+    description: >
+      The deployment id for an ELB
+  subnet_deployment_id:
+    description: >
+      The deployment id for a Subnet
+  instance_deployment_id:
+    description: >
+      The deployment id for an instance
+
+node_types:
+  
+  tr.ent.lb:
+    derived_from: cloudify.nodes.DeploymentProxy
+    properties:
+      resource_config:
+        default:
+          blueprint: 
+            id: "aws-elb-blueprint"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            main_file_name: "elb.yaml"
+          deployment: 
+            id: { get_input: elb_deployment_id }
+            inputs:
+            outputs:
+              ELB-FQDN: ELB-FQDN
+              ELB_RESOURCE_ID: ELB_RESOURCE_ID
+
+
+  tr.ent.compute.aws.subnet:
+    derived_from: cloudify.nodes.DeploymentProxy
+    properties:
+      resource_config:
+        default:
+          blueprint: 
+            id: "aws-elb-blueprint"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            main_file_name: "subnet.yaml"
+          deployment: 
+            id: { get_input: subnet_deployment_id }
+            inputs:
+            outputs:
+              aws_resource_id: aws_resource_id
+
+
+  tr.ent.compute.aws.instance:
+    derived_from: cloudify.nodes.DeploymentProxy
+    properties:
+      resource_config:
+        default:
+          blueprint: 
+            id: "aws-elb-blueprint"
+            blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
+            main_file_name: "instance.yaml"
+          deployment: 
+            id: { get_input: instance_deployment_id }
+            inputs:
+            outputs:
+              aws_resource_id: aws_resource_id
+
+  

@@ -1,0 +1,80 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint deploys a simple Nginx webserver on a CentOS Linux Node in AWS
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
+  - plugin:cloudify-awssdk-plugin
+  - plugin:cloudify-utilities-plugin
+
+inputs:
+ 
+  aws_vpc_id:
+    description: >
+      The VPC ID from EC2
+    default: "vpc-d21bc6ba"
+  
+  SubnetCidrBlock:
+    description: >
+      The cidr for the subnet
+    default: "172.31.61.0/24" 
+
+  availability_zone_extension:
+    description: >
+      The availability zone extention for the subnet (a, b or c)
+    default: "a" 
+  
+
+dsl_definitions:
+
+  aws_config: &aws_config
+    aws_access_key_id: { get_secret: aws_access_key_id }
+    aws_secret_access_key: { get_secret: aws_secret_access_key }
+    ec2_region_name: { get_secret: ec2_region_name }
+    ec2_region_endpoint: { get_secret: ec2_region_endpoint }
+
+  client_config: &client_config
+    aws_access_key_id: { get_secret: aws_access_key_id }
+    aws_secret_access_key: { get_secret: aws_secret_access_key }
+    region_name: { get_secret: ec2_region_name }
+
+node_templates:
+
+  
+  private_subnet:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      resource_config:
+        kwargs:
+          CidrBlock: { get_input: SubnetCidrBlock }
+          AvailabilityZone:
+            concat:
+              - get_secret: ec2_region_name
+              - { get_input: availability_zone_extension }
+    relationships:
+    - type: cloudify.relationships.depends_on
+      target: vpc
+
+
+  vpc:
+    type: cloudify.nodes.aws.ec2.Vpc
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+          CidrBlock: 'N/A'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: aws_vpc_id } 
+    relationships:
+
+
+outputs:
+  aws_resource_id:
+    description: Subnet resource id
+    value: { get_attribute: [ private_subnet, aws_resource_id ] }
