@@ -240,9 +240,9 @@ node_templates:
 
 
 outputs:
-  ip:
-    description: Public IP Address
-    value: { get_attribute: [ ip, aws_resource_id ] }
+  aws_resource_id:
+    description: aws_resource_id
+    value: { get_attribute: [ instance, aws_resource_id ] }
   fqdn:
     description: AWS FQDN
     value: { get_attribute: [ instance, create_response, Instances, 0, PublicDnsName] }

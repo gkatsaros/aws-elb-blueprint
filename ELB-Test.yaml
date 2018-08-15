@@ -1,0 +1,17 @@
+tosca_definitions_version: cloudify_dsl_1_3
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
+  - plugin:cloudify-utilities-plugin
+  - types/elb-service-types.yaml
+
+node_templates:
+  New_subnet:
+    type: tr.ent.compute.aws.subnet
+    capabilities:
+      scalable:
+        properties:
+          default_instances: 1
+    relationships: []
+    properties:
+      az_extension: a
+      cidr: 172.31.61.0/24

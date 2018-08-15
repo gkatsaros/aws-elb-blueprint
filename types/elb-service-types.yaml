@@ -2,9 +2,6 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 inputs:
-  elb_deployment_id:
-    description: >
-      The deployment id for an ELB
   subnet_deployment_id:
     description: >
       The deployment id for a Subnet
@@ -17,15 +14,17 @@ node_types:
   tr.ent.lb:
     derived_from: cloudify.nodes.DeploymentProxy
     properties:
+      elb_deployment_id:
+        required: true
       resource_config:
         default:
           blueprint: 
-            id: "aws-elb-blueprint"
+            id: "aws-elb-blueprint-elb"
             blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
             main_file_name: "elb.yaml"
           deployment: 
-            id: { get_input: elb_deployment_id }
             inputs:
+              id: { get_attribute: [ SELF, elb_deployment_id] }
             outputs:
               ELB-FQDN: ELB-FQDN
               ELB_RESOURCE_ID: ELB_RESOURCE_ID
@@ -34,10 +33,16 @@ node_types:
   tr.ent.compute.aws.subnet:
     derived_from: cloudify.nodes.DeploymentProxy
     properties:
+      cidr:
+        default: "172.31.61.0/24"
+      az_extension:
+        default: "a"
+      vpc_id:
+        default: "vpc-d21bc6ba"
       resource_config:
         default:
           blueprint: 
-            id: "aws-elb-blueprint"
+            id: "aws-elb-blueprint-subnet"
             blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
             main_file_name: "subnet.yaml"
           deployment: 
@@ -45,21 +50,29 @@ node_types:
             inputs:
             outputs:
               aws_resource_id: aws_resource_id
+      subnet_resource_id:
+        default:
+          get_attribute: [SELF, deployment, outputs, aws_resource_id ]
 
 
   tr.ent.compute.aws.instance:
     derived_from: cloudify.nodes.DeploymentProxy
     properties:
+      subnet_id: 
+        default: "dummy_id"
+        required: true
       resource_config:
         default:
           blueprint: 
-            id: "aws-elb-blueprint"
+            id: "aws-elb-blueprint-instance"
             blueprint_archive: "https://github.com/gkatsaros/aws-elb-blueprint/archive/1.0.zip"
             main_file_name: "instance.yaml"
           deployment: 
             id: { get_input: instance_deployment_id }
             inputs:
+              subnet_resource_id: { get_attribute: [ SELF, subnet_id ] }
             outputs:
               aws_resource_id: aws_resource_id
+              fqdn: fqdn
 
   
