@@ -14,9 +14,15 @@ inputs:
     description: >
       The VPC ID from EC2
     default: "vpc-d21bc6ba"
-  Subnets:
+  subnet1:
     description: The list of Subnets asscociated with the ELB.
-    default: []
+    default: ""
+  subnet2:
+    description: The list of Subnets asscociated with the ELB.
+    default: ""
+  subnet3:
+    description: The list of Subnets asscociated with the ELB.
+    default: ""
   SecurityGroups:
     description: The list of SecGroups IDs asscociated with the ELB
     default: []
@@ -111,7 +117,7 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: [Subnets, 0] } 
+            aws_resource_id: { get_input: subnet1 } 
     relationships:
 
   sub2:
@@ -125,7 +131,7 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: [Subnets, 1] } 
+            aws_resource_id: { get_input: subnet2 } 
     relationships:
 
   sub3:
@@ -139,7 +145,7 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: [Subnets, 2] } 
+            aws_resource_id: { get_input: subnet3 } 
     relationships:
 
 
