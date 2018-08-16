@@ -121,6 +121,17 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: centos_core_ami
  
+  application-instance:
+    type: cloudify.nodes.ApplicationModule
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start: scripts/start.sh
+        stop: scripts/stop.sh
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: instance
+
+
   ip:
     type: cloudify.nodes.aws.ec2.ElasticIP
     properties:
