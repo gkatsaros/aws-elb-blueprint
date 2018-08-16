@@ -48,6 +48,11 @@ inputs:
   subnet_resource_id:
     description: The AWS resource ID of the subnet for this instance.
 
+  availability_zone_extension:
+    description: >
+      The availability zone extention for the subnet (a, b or c)
+    default: "a" 
+
 
 
 dsl_definitions:
@@ -103,7 +108,7 @@ node_templates:
             AvailabilityZone:
               concat:
                 - get_secret: ec2_region_name
-                - a
+                - get_input: availability_zone_extension
           UserData: { get_attribute: [ cloudify_host_cloud_config, cloud_config ] }
       client_config: *client_config
     relationships:
