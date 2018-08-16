@@ -100,6 +100,49 @@ node_templates:
         target: classic_elb
 
 
+sub1:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: Subnets[0] } 
+    relationships:
+
+sub2:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: Subnets[1] } 
+    relationships:
+
+  sub3:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: Subnets[2] } 
+    relationships:
+
+
   classic_elb:
     type: cloudify.nodes.aws.elb.Classic.LoadBalancer
     properties:
@@ -113,9 +156,13 @@ node_templates:
               - kwargs
               - Listeners
       client_config: *client_config
-      Subnets: {get_input: Subnets}
-      SecurityGroups: {get_input: SecurityGroups}
     relationships:
+      - type: cloudify.relationships.depends_on
+        target: sub1
+      - type: cloudify.relationships.depends_on
+        target: sub2
+      - type: cloudify.relationships.depends_on
+        target: sub3
     interfaces:
       cloudify.interfaces.lifecycle:
         start:
