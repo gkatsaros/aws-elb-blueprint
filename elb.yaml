@@ -100,7 +100,7 @@ node_templates:
         target: classic_elb
 
 
-sub1:
+  sub1:
     type: cloudify.nodes.aws.ec2.Subnet
     properties:
       client_config: *client_config
@@ -114,7 +114,7 @@ sub1:
             aws_resource_id: { get_input: [Subnets, 0] } 
     relationships:
 
-sub2:
+  sub2:
     type: cloudify.nodes.aws.ec2.Subnet
     properties:
       client_config: *client_config
