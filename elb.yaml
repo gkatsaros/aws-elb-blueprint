@@ -14,6 +14,12 @@ inputs:
     description: >
       The VPC ID from EC2
     default: "vpc-d21bc6ba"
+  Subnets:
+    description: The list of Subnets asscociated with the ELB.
+    default: []
+  SecurityGroups:
+    description: The list of SecGroups IDs asscociated with the ELB
+    default: []
 
 dsl_definitions:
 
@@ -107,6 +113,8 @@ node_templates:
               - kwargs
               - Listeners
       client_config: *client_config
+      Subnets: {get_input: Subnets}
+      SecurityGroups: {get_input: SecurityGroups}
     relationships:
     interfaces:
       cloudify.interfaces.lifecycle:
