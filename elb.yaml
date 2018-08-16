@@ -111,7 +111,7 @@ sub1:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: Subnets[0] } 
+            aws_resource_id: { get_input: [Subnets, 0] } 
     relationships:
 
 sub2:
@@ -125,7 +125,7 @@ sub2:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: Subnets[1] } 
+            aws_resource_id: { get_input: [Subnets, 1] } 
     relationships:
 
   sub3:
@@ -139,7 +139,7 @@ sub2:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            aws_resource_id: { get_input: Subnets[2] } 
+            aws_resource_id: { get_input: [Subnets, 2] } 
     relationships:
 
 
