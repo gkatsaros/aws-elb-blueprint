@@ -6,6 +6,7 @@ description: >
 imports:
   - http://www.getcloudify.org/spec/cloudify/4.3/types.yaml
   - plugin:cloudify-awssdk-plugin
+  - plugin:cloudify-utilities-plugin
 
 inputs:
 
@@ -46,6 +47,7 @@ inputs:
 
   subnet_resource_id:
     description: The AWS resource ID of the subnet for this instance.
+
 
 
 dsl_definitions:
@@ -183,7 +185,7 @@ node_templates:
     properties:
       resource_config:
         kwargs:
-          GroupName: AwsELBTest-SecurityGroup # make it dynamic
+          GroupName: { concat: [ 'SecurityGroup_', { get_input: subnet_resource_id } ] }   
           Description: Created by dummy-aws-webserver blueprint
           VpcId: { get_attribute: [ vpc, aws_resource_id] }
       client_config: *client_config
