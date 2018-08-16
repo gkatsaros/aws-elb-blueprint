@@ -15,13 +15,22 @@ inputs:
       The VPC ID from EC2
     default: "vpc-d21bc6ba"
   subnet1:
-    description: The list of Subnets asscociated with the ELB.
+    description: The subnet asscociated with the ELB.
     default: ""
   subnet2:
-    description: The list of Subnets asscociated with the ELB.
+    description: The subnet asscociated with the ELB.
     default: ""
   subnet3:
-    description: The list of Subnets asscociated with the ELB.
+    description: The subnet asscociated with the ELB.
+    default: ""
+  instance1: 
+    description: The AWS instance to be added to the lb
+    default: ""
+  instance2: 
+    description: The AWS instance to be added to the lb
+    default: ""
+  instance3: 
+    description: The AWS instance to be added to the lb
     default: ""
   SecurityGroups:
     description: The list of SecGroups IDs asscociated with the ELB
@@ -147,6 +156,54 @@ node_templates:
           inputs:
             aws_resource_id: { get_input: subnet3 } 
     relationships:
+
+  inst1:
+    type: cloudify.nodes.aws.ec2.Instances
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: instance1 } 
+    relationships:
+      - type: cloudify.relationships.aws.elb.instance.connected_to
+        target: classic_elb
+
+  inst2:
+    type: cloudify.nodes.aws.ec2.Instances
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: instance1 } 
+    relationships:
+      - type: cloudify.relationships.aws.elb.instance.connected_to
+        target: classic_elb
+
+  inst3:
+    type: cloudify.nodes.aws.ec2.Instances
+    properties:
+      client_config: *client_config
+      use_external_resource: true
+      resource_config:
+        kwargs:
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            aws_resource_id: { get_input: instance1 } 
+    relationships:
+      - type: cloudify.relationships.aws.elb.instance.connected_to
+        target: classic_elb
 
 
   classic_elb:
