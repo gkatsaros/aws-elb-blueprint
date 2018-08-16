@@ -160,6 +160,8 @@ node_templates:
   inst1:
     type: cloudify.nodes.aws.ec2.Instances
     properties:
+      agent_config:
+        install_method: none
       client_config: *client_config
       use_external_resource: true
       resource_config:
@@ -176,6 +178,8 @@ node_templates:
   inst2:
     type: cloudify.nodes.aws.ec2.Instances
     properties:
+      agent_config:
+        install_method: none
       client_config: *client_config
       use_external_resource: true
       resource_config:
@@ -192,6 +196,8 @@ node_templates:
   inst3:
     type: cloudify.nodes.aws.ec2.Instances
     properties:
+      agent_config:
+        install_method: none
       client_config: *client_config
       use_external_resource: true
       resource_config:
