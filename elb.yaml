@@ -158,12 +158,10 @@ node_templates:
         install_method: none
       client_config: *client_config
       use_external_resource: true
-      resource_id: { get_input: instance1 } 
+      resource_id: { get_input: instance2 } 
     relationships:
       - type: cloudify.relationships.aws.elb.instance.connected_to
         target: classic_elb
-      - type: cloudify.relationships.depends_on
-        target: inst1
 
   inst3:
     type: cloudify.nodes.aws.ec2.Instances
@@ -172,12 +170,10 @@ node_templates:
         install_method: none
       client_config: *client_config
       use_external_resource: true
-      resource_id: { get_input: instance1 } 
+      resource_id: { get_input: instance3 } 
     relationships:
       - type: cloudify.relationships.aws.elb.instance.connected_to
         target: classic_elb
-      - type: cloudify.relationships.depends_on
-        target: inst2
 
 
   classic_elb:
