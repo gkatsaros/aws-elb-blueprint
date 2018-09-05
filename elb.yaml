@@ -162,6 +162,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.aws.elb.instance.connected_to
         target: classic_elb
+      - type: cloudify.relationships.depends_on
+        target: inst1
 
   inst3:
     type: cloudify.nodes.aws.ec2.Instances
@@ -174,6 +176,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.aws.elb.instance.connected_to
         target: classic_elb
+      - type: cloudify.relationships.depends_on
+        target: inst2
 
 
   classic_elb:
